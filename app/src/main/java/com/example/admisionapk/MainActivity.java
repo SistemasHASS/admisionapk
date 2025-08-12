@@ -33,20 +33,21 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setDomStorageEnabled(true);
         webSettings.setMediaPlaybackRequiresUserGesture(false); // Para reproducir sin clic previo
 
-        // Para manejar permisos de cámara/micrófono desde WebView
+        // Registrar el puente JavaScript para huella
+        webView.addJavascriptInterface(new HuellaBridge(this), "AndroidHuella");
+
+        // Manejar permisos de cámara/micrófono
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
                 runOnUiThread(() -> {
                     if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CAMERA)
                             != PackageManager.PERMISSION_GRANTED) {
-                        // Guardamos la request y pedimos permiso Android
                         permissionRequest = request;
                         ActivityCompat.requestPermissions(MainActivity.this,
                                 new String[]{Manifest.permission.CAMERA},
                                 REQUEST_CAMERA_PERMISSION);
                     } else {
-                        // Ya tenemos permiso, concedemos directamente
                         request.grant(request.getResources());
                     }
                 });
@@ -56,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
         webView.setWebViewClient(new WebViewClient());
         webView.loadUrl("https://admision.agroapps.net:7009/");
 
-        // Botón atrás en WebView
+        // Botón atrás para WebView
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {

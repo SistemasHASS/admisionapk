@@ -10,7 +10,6 @@
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
 
     <application
-        android:name="com.example.admisionapk.MyApp"
         android:allowBackup="true"
         android:label="AdmisionAPK"
         android:supportsRtl="true"
