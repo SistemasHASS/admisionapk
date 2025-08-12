@@ -1,4 +1,4 @@
-package com.example.huellaserver;
+package com.example.admisionapk;
 
 import android.content.Context;
 import android.graphics.Bitmap;

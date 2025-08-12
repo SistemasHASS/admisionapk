@@ -1,4 +1,4 @@
-package com.example.huellaserver;
+package com.example.admisionapk;
 
 import android.hardware.usb.UsbDevice;
 

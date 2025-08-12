@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.huellaserver'
+    namespace 'com.example.admisionapk'
     compileSdk 36
 
     defaultConfig {
-        applicationId "com.example.huellaserver"
+        applicationId "com.example.admisionapk"
         minSdk 28
         targetSdk 36
         versionCode 1
