@@ -1,0 +1,47 @@
+plugins {
+    alias(libs.plugins.android.application)
+}
+
+android {
+    namespace 'com.example.huellaserver'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId "com.example.huellaserver"
+        minSdk 28
+        targetSdk 36
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+}
+
+dependencies {
+    // SDK ZKTeco: detecta automáticamente todos los .jar/.aar en app/libs
+    implementation fileTree(dir: "libs", include: ["*.jar", "*.aar"])
+    implementation 'org.nanohttpd:nanohttpd:2.3.1'
+
+    // Dependencias de Android
+    implementation libs.appcompat
+    implementation libs.material
+
+    // Servidor HTTP embebido (NanoHTTPD)
+    implementation 'org.nanohttpd:nanohttpd:2.3.1'
+
+    // Tests
+    testImplementation libs.junit
+    androidTestImplementation libs.ext.junit
+    androidTestImplementation libs.espresso.core
+}
