@@ -11,7 +11,8 @@
 
     <application
         android:allowBackup="true"
-        android:label="AdmisionAPK"
+        android:label="AdmisionAPK_v1.0.0"
+        android:icon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <activity android:name="com.example.admisionapk.MainActivity" android:exported="true">

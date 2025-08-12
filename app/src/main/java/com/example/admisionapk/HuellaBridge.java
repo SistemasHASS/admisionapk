@@ -55,4 +55,12 @@ public class HuellaBridge {
         }
         return null;
     }
+
+    @JavascriptInterface
+    public void limpiarHuella() {
+        if (huellaHandler != null) {
+            huellaHandler.clearHuella();
+        }
+    }
+
 }

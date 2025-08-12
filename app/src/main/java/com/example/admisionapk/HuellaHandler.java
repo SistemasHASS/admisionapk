@@ -117,4 +117,8 @@ public class HuellaHandler implements ZKUSBManagerListener {
         }
         return null;
     }
+
+    public void clearHuella() {
+        this.ultimaImagenPNG = null;
+    }
 }
