@@ -9,15 +9,30 @@ android {
     defaultConfig {
         applicationId "com.example.admisionapk"
         minSdk 28
-        targetSdk 36
+        targetSdk 34
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        release {
+            // Keystore actualizado con tu ruta y contraseña
+            storeFile file("C:/proyectos/apps/app_admision/admisionkeystore")
+            storePassword "admisionapp"
+            keyAlias "admisionkey"
+            keyPassword "admisionapp"
+
+            // Versiones de firma
+            v1SigningEnabled true
+            v2SigningEnabled true
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }

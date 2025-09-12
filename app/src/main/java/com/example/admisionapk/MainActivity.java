@@ -2,14 +2,21 @@ package com.example.admisionapk;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.net.http.SslError;
+import android.os.Build;
 import android.os.Bundle;
 import android.webkit.PermissionRequest;
+import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -20,10 +27,14 @@ public class MainActivity extends AppCompatActivity {
 
     private WebView webView;
     private PermissionRequest permissionRequest;
+    private HuellaBridge huellaBridge; // 🔹 Guardar referencia
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // 🔹 Inicializar HuellaBridge ANTES que el WebView
+        huellaBridge = new HuellaBridge(this);
 
         webView = new WebView(this);
         setContentView(webView);
@@ -31,12 +42,33 @@ public class MainActivity extends AppCompatActivity {
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
-        webSettings.setMediaPlaybackRequiresUserGesture(false); // Para reproducir sin clic previo
+        webSettings.setMediaPlaybackRequiresUserGesture(false);
 
-        // Registrar el puente JavaScript para huella
-        webView.addJavascriptInterface(new HuellaBridge(this), "AndroidHuella");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        }
 
-        // Manejar permisos de cámara/micrófono
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+                handler.proceed();
+            }
+
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                // Solo mostrar si es el frame principal
+                if (request.isForMainFrame()) {
+                    Toast.makeText(MainActivity.this,
+                            "Error cargando la página: " + error.getDescription(),
+                            Toast.LENGTH_LONG).show();
+                }
+                // Si no es el frame principal, ignoramos para evitar spam de errores
+            }
+        });
+
+        // 🔹 Registrar el puente JS con la instancia ya inicializada
+        webView.addJavascriptInterface(huellaBridge, "AndroidHuella");
+
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
@@ -54,10 +86,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        webView.setWebViewClient(new WebViewClient());
         webView.loadUrl("https://admision.agroapps.net:7009/");
 
-        // Botón atrás para WebView
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -71,9 +101,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         if (requestCode == REQUEST_CAMERA_PERMISSION) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+            if (granted) {
                 if (permissionRequest != null) {
                     permissionRequest.grant(permissionRequest.getResources());
                 }
@@ -81,8 +114,22 @@ public class MainActivity extends AppCompatActivity {
                 if (permissionRequest != null) {
                     permissionRequest.deny();
                 }
+                Toast.makeText(this, "Permiso de cámara requerido para continuar", Toast.LENGTH_LONG).show();
             }
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (webView != null) {
+            webView.loadUrl("about:blank");
+            webView.stopLoading();
+            webView.setWebChromeClient(null);
+            webView.setWebViewClient(null);
+            webView.destroy();
+            webView = null;
+        }
+        super.onDestroy();
     }
 }
